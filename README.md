@@ -98,9 +98,9 @@ We can change the implementation of the class to receive a `TUScheduler` on crea
   return self;
 }
 
-- (void)loadContactsWithCompletion:(void(^)(NSArray * contacts))completion {
+- (void)loadContactsWithCompletion:(void(^)(NSArray *contacts))completion {
   [self.scheduler scheduleAsync:^{
-    NSArray * contacts = [self incrediblySlowMethodToLoadContacts];
+    NSArray *contacts = [self incrediblySlowMethodToLoadContacts];
     completion(contacts);
   }];
 }
