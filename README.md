@@ -85,9 +85,9 @@ Let's go back to the previous example:
 How can we test this component using TUScheduler?
 
 
-### The Simple Way
+### Injecting `<TUScheduler>`
 
-We can change the implementation of the class to receive a `TUScheduler` on creation. The `loadContactsWithCompletion:` method now delegates on the scheduler to perform the async
+We can change the implementation of the class to receive a `<TUScheduler>` on creation. The `loadContactsWithCompletion:` method now delegates on the scheduler to perform the async
 
 ``` objective-c
 @implementation ContactLoader
@@ -107,7 +107,7 @@ We can change the implementation of the class to receive a `TUScheduler` on crea
 @end
 ```
 
-TUScheduler provides two different families of schedulers, based on GCD and `NSOperation` respectively. You can inject whichever you prefer:
+TUScheduler provides two different families of schedulers, based on GCD and `NSOperationQueues` respectively. You can inject whichever you prefer:
 
 ```objective-c
 id<TUScheduler> scheduler = [TUGCDScheduler serialSchedulerWithName:@"com.tuenti.GCD.Serial"];
@@ -135,9 +135,9 @@ Now writing tests for this component is completely trivial:
 The execution of the block would be completely synchronous, so no wait times, polling or timeouts. Just check the behaviour is the expected, and isolate the hard-to-test logic inside the scheduler.
 
 
-### The Clean Way
+### Injecting `<TUSchedulerFactory>` [Recommended]
 
-Classes should be responsible of managing their concurrency mechanisms privately. It is very weird if the class that creates `ContactLoader` is responsible of deciding whether the concurrency mechanism is serial or concurrent, or what should be its name. Furthermore, some classes could need several schedulers to work (e.g. a serial one to keep an internal collection synchronized and a concurrent one to post heavy background tasks).
+The concurrency mechanisms that a class uses for its internal operation are not interesting for the component that creates the class. Each class should be responsible of managing its own schedulers privately, since they are just implementation details. It is a bad idea if the class that creates `ContactLoader` is responsible of deciding whether `ContactLoader` uses a serial or concurrent scheduler, or which should be the name of the scheduler. Furthermore, some classes could need several schedulers to work (e.g. a serial one to keep an internal collection synchronized and a concurrent one to post heavy background tasks).
 
 The solution is to use the abstract factory `TUSchedulerFactory`. The factory is injected during initialization, and then the class can use it to create as many schedulers as it needs, configuring them internally:
 
